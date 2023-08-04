@@ -1,0 +1,24 @@
+{
+  "name": "efd-client-function",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/lsst-epo/efd-client-function.git",
+  "author": "Eric Rosas <ericdrosas@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "functions-framework --target=index",
+    "prestart": "npm run build",
+    "gcp-build": "npm run build"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.2.1",
+    "@google-cloud/logging": "^10.5.0",
+    "@influxdata/influxdb-client": "^1.33.2",
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}
