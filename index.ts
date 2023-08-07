@@ -93,9 +93,9 @@ ff.http('summit-stats', async (req: ff.Request, res: ff.Response) => {
     ).then(values => {
         const payload = {
             digest: {
-                current: values.filter((e:any): e is currentWeatherI => e.current)[0],
-                hourly: values.filter((e:any): e is hourlyWeatherI => e.hourly)[0],
-                daily: values.filter((e:any): e is dailyWeatherI => e.daily)[0]
+                current: values.filter((e:any): e is currentWeatherI => e.current)[0].current[0],
+                hourly: values.filter((e:any): e is hourlyWeatherI => e.hourly)[0].hourly,
+                daily: values.filter((e:any): e is dailyWeatherI => e.daily)[0].daily
             }
         }
 
