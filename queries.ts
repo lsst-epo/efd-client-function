@@ -1,5 +1,14 @@
 import { flux } from "@influxdata/influxdb-client";
 
+export const azimuthStatus = (bucket:any) => flux`from(bucket: "${bucket}")
+    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+    |> filter(fn: (r) => r._measurement == "lsst.sal.ATPtg.mountStatus")
+    |> filter(fn: (r) => r["_field"] == "mountAz" or r["_field"]  == "mountEl" )
+    |> drop(columns: ["_measurement"])
+    |> aggregateWindow(every: 1m, fn: mean)
+    |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+    |> yield(name: "mountStatus")`;
+
 export const currentWeather = (bucket:any) => flux`from(bucket: "${bucket}")
   |> range(start: -60s)
   |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
