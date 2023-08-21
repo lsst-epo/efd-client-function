@@ -10,16 +10,17 @@ export const azimuthStatus = (bucket:any) => flux`from(bucket: "${bucket}")
     |> yield(name: "mountStatus")`;
 
 export const currentWeather = (bucket:any) => flux`from(bucket: "${bucket}")
-  |> range(start: -60s)
-  |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
-  |> filter(fn: (r) => r["_field"] == "relativeHumidity" or r["_field"] == "dewPoint" or r["_field"] == "temperature0" or r["_field"] == "speed" or r["_field"] == "pressure0" or r["_field"] == "direction")
-  |> last()
-  |> set(key: "_pivoter", value: "stuff")
-  |> group()
-  |> pivot(rowKey:["_pivoter"], columnKey: ["_field"], valueColumn: "_value")
-  |> drop(columns: ["_pivoter"])
-  |> rename(columns: {direction: "windDirection", speed: "windspeed"})
-  |> yield(name: "realtime")`;
+    |> range(start: -60s)
+    |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ATPtg.mountStatus" or r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
+    |> filter(fn: (r) => r["_field"] == "mountAz" or r["_field"]  == "mountEl" or r["_field"] == "relativeHumidity" or r["_field"] == "dewPoint" or r["_field"] == "temperature0" or r["_field"] == "speed" or r["_field"] == "pressure0" or r["_field"] == "direction")
+    |> last()
+    |> set(key: "_pivoter", value: "stuff")
+    |> group()
+    |> pivot(rowKey:["_pivoter"], columnKey: ["_field"], valueColumn: "_value")
+    |> drop(columns: ["_pivoter"])
+    |> rename(columns: {direction: "windDirection", speed: "windspeed"})
+    |> yield(name: "realtime")`;
+
 
   export const hourlyWeather = (bucket:any) => {
     return flux`
