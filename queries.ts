@@ -9,10 +9,11 @@ export const azimuthStatus = (bucket:any) => flux`from(bucket: "${bucket}")
     |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
     |> yield(name: "mountStatus")`;
 
+    // Original: |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ATPtg.mountStatus" or r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
 export const currentWeather = (bucket:any) => flux`from(bucket: "${bucket}")
     |> range(start: -60s)
-    |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ATPtg.mountStatus" or r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
-    |> filter(fn: (r) => r["_field"] == "mountAz" or r["_field"]  == "mountEl" or r["_field"] == "relativeHumidity" or r["_field"] == "dewPoint" or r["_field"] == "temperature0" or r["_field"] == "speed" or r["_field"] == "pressure0" or r["_field"] == "direction")
+    |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
+    |> filter(fn: (r) => r["_field"] == "relativeHumidity" or r["_field"] == "dewPointItem" or r["_field"] == "temperatureItem0" or r["_field"] == "speed" or r["_field"] == "pressureItem0" or r["_field"] == "direction")
     |> last()
     |> set(key: "_pivoter", value: "stuff")
     |> group()
@@ -23,32 +24,32 @@ export const currentWeather = (bucket:any) => flux`from(bucket: "${bucket}")
 
 
   export const hourlyWeather = (bucket:any) => {
-    return flux`
-    import "date"
-  data = from(bucket: "${bucket}")
-      |> range(start: date.truncate(t: now(), unit: 1d), stop: now())
-      |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
-      |> filter(fn: (r) => r["_field"] == "relativeHumidity" or r["_field"] == "dewPoint" or r["_field"] == "temperature0" or r["_field"] == "speed" or r["_field"] == "pressure0" or r["_field"] == "direction")
-      |> drop(columns: ["_measurement"])
-      
-  min = data
-      |> aggregateWindow(every: 1h, fn: min)
-      |> map(fn: (r) => ({r with _field: r._field + "_min"}))
+    return flux`import "date"
+    data = from(bucket: "${bucket}")
+        |> range(start: date.truncate(t: now(), unit: 1d), stop: now())
+        |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
+        |> filter(fn: (r) => r["_field"] == "relativeHumidity" or r["_field"] == "dewPointItem" or r["_field"] == "temperatureItem0" or r["_field"] == "speed" or r["_field"] == "pressureItem0" or r["_field"] == "direction")
+        |> drop(columns: ["_measurement"])
         
-  mean = data
-      |> aggregateWindow(every: 1h, fn: mean)
-      |> map(fn: (r) => ({r with _field: r._field + "_mean"}))
-  
-  max = data
-      |> aggregateWindow(every: 1h, fn: max)
-      |> map(fn: (r) => ({r with _field: r._field + "_max"}))
-      
-  union(tables: [min, mean, max])
-      |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-      |> yield(name: "historical")`;
+    min = data
+        |> aggregateWindow(every: 1h, fn: min)
+        |> map(fn: (r) => ({r with _field: r._field + "_min"}))
+            
+    mean = data
+        |> aggregateWindow(every: 1h, fn: mean)
+        |> map(fn: (r) => ({r with _field: r._field + "_mean"}))
+    
+    max = data
+        |> aggregateWindow(every: 1h, fn: max)
+        |> map(fn: (r) => ({r with _field: r._field + "_max"}))
+        
+    union(tables: [min, mean, max])
+        |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> yield(name: "historical")`;
   };
   
   export const dailyWeather = (bucket:any) => {
+    console.log("Inside of dailyWeather!")
     const start = new Date();
     const end = new Date();
   
@@ -65,7 +66,7 @@ export const currentWeather = (bucket:any) => flux`from(bucket: "${bucket}")
     return flux`data = from(bucket: "${bucket}")
         |> range(start: ${start}, stop: ${end})
         |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ESS.temperature")
-        |> filter(fn: (r) => r["_field"] == "temperature0")
+        |> filter(fn: (r) => r["_field"] == "temperatureItem0")
         |> drop(columns: ["_measurement"])
         
     min = data
