@@ -49,11 +49,11 @@ async function dailySummitStats(req: ff.Request, res: ff.Response) {
                 return res.status(500).json(response.data);
             }
         }).catch(err => {
-            console.error("An error occurred, caught in the .catch()");
             console.error(err.response);
             return res.status(500).json(err.data);
         });
     }).catch(error => {
+        console.log(error)
         return res.status(500).json(error);
     });
 }
@@ -164,11 +164,11 @@ async function hourlySummitStats(req: ff.Request, res: ff.Response) {
                 return res.status(500).json(response.data);
             }
         }).catch(err => {
-            console.error("An error occurred, caught in the .catch()");
             console.error(err.response);
             return res.status(500).json(err.data);
         });
     }).catch(error => {
+        console.log(error);
         return res.status(500).json(error);
     });
 }
@@ -196,10 +196,10 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
                 resolve({ [type]: data })
             },
         });
-    }).then((values:any)  => {
-        const payload = {
-            current: values.current[0]
-        }
+        }).then((values:any)  => {
+            const payload = {
+                current: values.current[0]
+            }
         
         axios.post(
             "https://us-west1-skyviewer.cloudfunctions.net/redis-client/current-stats", 
@@ -208,10 +208,9 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
             if(response.data.status == "SUCCESS") {
                 return res.status(200).json(payload);
             } else {
-                return res.status(500).json(response.data);
+                return res.status(500).json(response);
             }
         }).catch(err => {
-            console.error("An error occurred, caught in the .catch()");
             console.error(err.response);
             return res.status(500).json(err.data);
         });
