@@ -18,10 +18,6 @@ async function dailySummitStats(req: ff.Request, res: ff.Response) {
     const influxDB = new InfluxDB({ url, token, timeout });
     const queryApi = influxDB.getQueryApi("");
 
-    console.log(`Bucket: ${bucket}`);
-    console.log(`URL: ${url}`);
-    console.log(`Token: ${token}`);
-
     new Promise((resolve, reject) => {
         let type = "daily";
         let test:any = type;
@@ -42,8 +38,6 @@ async function dailySummitStats(req: ff.Request, res: ff.Response) {
         const payload = {
             daily: values.daily
         }
-        console.log("Logging payload in daily function!");
-        console.log(payload);
 
         axios.post(
             "https://us-west1-skyviewer.cloudfunctions.net/redis-client/daily-stats", 
@@ -55,29 +49,24 @@ async function dailySummitStats(req: ff.Request, res: ff.Response) {
                 return res.status(500).json(response.data);
             }
         }).catch(err => {
-            console.error("An error occurred, caught in the .catch()");
             console.error(err.response);
             return res.status(500).json(err.data);
         });
     }).catch(error => {
-        console.log("An error was caught!");
         console.log(error)
         return res.status(500).json(error);
     });
 }
 
 ff.http("summit-stats", async (req: ff.Request, res: ff.Response) => {
-    console.log("Inside of function endpoint");
 
     if(req.path == "/") {
         return res.status(200).send("All's well that ends well.");
     } else if(req.path == "/hourly-stats") {
         return hourlySummitStats(req, res);
     } else if(req.path == "/current-stats") {
-        console.log("About to query for current summit stats!");
         return currentSummitStats(req, res);
     } else if(req.path == "/daily-stats") {
-        console.log("About to query for daily summit stats!");
         return dailySummitStats(req, res);
     // } else if(req.path == "/azimuth-stats") {
     //     return azimuthSummitStats(req, res);
@@ -145,7 +134,6 @@ async function hourlySummitStats(req: ff.Request, res: ff.Response) {
     const queryApi = influxDB.getQueryApi("");
 
     new Promise((resolve, reject) => {
-        console.log("got to hourly promise!!");
         let type = "hourly";
         let test:any = type;
         const query = types[test as keyof Object];
@@ -162,8 +150,6 @@ async function hourlySummitStats(req: ff.Request, res: ff.Response) {
             },
         });
     }).then((values:any) => {
-        console.log("about to log hourly values!");
-        console.log(values);
         const payload = {
             hourly: values.hourly
         }
@@ -178,12 +164,10 @@ async function hourlySummitStats(req: ff.Request, res: ff.Response) {
                 return res.status(500).json(response.data);
             }
         }).catch(err => {
-            console.error("An error occurred, caught in the .catch()");
             console.error(err.response);
             return res.status(500).json(err.data);
         });
     }).catch(error => {
-        console.log("An error occurred!");
         console.log(error);
         return res.status(500).json(error);
     });
@@ -214,12 +198,9 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
         });
         }).then((values:any)  => {
             const payload = {
-                // current: values.current[0]
-                current: values
+                current: values.current[0]
             }
         
-        console.log("Logging payload!");
-        console.log(payload);
         axios.post(
             "https://us-west1-skyviewer.cloudfunctions.net/redis-client/current-stats", 
             payload
@@ -227,11 +208,9 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
             if(response.data.status == "SUCCESS") {
                 return res.status(200).json(payload);
             } else {
-                console.log("An error occurred in the .then()!");
                 return res.status(500).json(response);
             }
         }).catch(err => {
-            console.error("An error occurred, caught in the .catch()");
             console.error(err.response);
             return res.status(500).json(err.data);
         });

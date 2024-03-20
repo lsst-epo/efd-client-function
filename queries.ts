@@ -9,10 +9,9 @@ export const azimuthStatus = (bucket:any) => flux`from(bucket: "${bucket}")
     |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
     |> yield(name: "mountStatus")`;
 
-    // Original: |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ATPtg.mountStatus" or r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
 export const currentWeather = (bucket:any) => flux`from(bucket: "${bucket}")
     |> range(start: -60s)
-    |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
+    |> filter(fn: (r) => r["_measurement"] == "lsst.sal.ATPtg.mountStatus" or r["_measurement"] == "lsst.sal.ESS.pressure" or r["_measurement"] == "lsst.sal.ESS.dewPoint" or r["_measurement"] == "lsst.sal.ESS.temperature" or r["_measurement"] == "lsst.sal.ESS.relativeHumidity" or r["_measurement"] == "lsst.sal.ESS.airFlow")
     |> filter(fn: (r) => r["_field"] == "relativeHumidity" or r["_field"] == "dewPointItem" or r["_field"] == "temperatureItem0" or r["_field"] == "speed" or r["_field"] == "pressureItem0" or r["_field"] == "direction")
     |> last()
     |> set(key: "_pivoter", value: "stuff")
