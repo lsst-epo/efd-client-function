@@ -198,7 +198,7 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
         });
         }).then((values:any)  => {
             const payload = {
-                current: values.current[0]
+                current: values.current
             }
         
         axios.post(
