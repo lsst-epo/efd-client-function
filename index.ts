@@ -61,7 +61,7 @@ async function dailySummitStats(req: ff.Request, res: ff.Response) {
 ff.http("summit-stats", async (req: ff.Request, res: ff.Response) => {
 
     if(req.path == "/") {
-        return res.status(200).send("All's well that ends well.");
+        return res.status(200).send("🐈‍⬛");
     } else if(req.path == "/hourly-stats") {
         return hourlySummitStats(req, res);
     } else if(req.path == "/current-stats") {
@@ -198,7 +198,7 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
         });
         }).then((values:any)  => {
             const payload = {
-                current: values.current
+                current: values.current[0]
             }
         
         axios.post(
