@@ -1,7 +1,7 @@
 import { flux } from "@influxdata/influxdb-client";
 
 export const domeStatus = (bucket:any) => flux`from(bucket: "${bucket}")
-    |> range(start: -1d)
+    |> range(start: -60s)
     |> filter(fn: (r) => 
         r._measurement == "lsst.sal.MTDome.apertureShutter" and 
         (

@@ -128,9 +128,7 @@ ff.http("summit-stats", async (req: ff.Request, res: ff.Response) => {
     //     return azimuthSummitStats(req, res);
     } else if(req.path == "/dome-stats") {
         return domeStats(req, res)
-    }
-    
-    else {
+    } else {
         return res.status(400).send("Oopsies.");
     }
     
