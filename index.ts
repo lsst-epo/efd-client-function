@@ -1,14 +1,70 @@
 import 'dotenv/config'
 import * as ff from '@google-cloud/functions-framework';
 import { InfluxDB } from "@influxdata/influxdb-client";
-import { currentWeather, hourlyWeather, dailyWeather } from "./queries";
+import { currentWeather, hourlyWeather, dailyWeather, domeStatus } from "./queries";
 import axios from "axios";
 
 const types = {
     current: currentWeather,
     hourly: hourlyWeather,
     daily: dailyWeather,
+    dome: domeStatus
 };
+
+async function domeStats(req: ff.Request, res: ff.Response) {
+    const url:string = String(process.env.EFD_URL);
+    const bucket:string = String(process.env.EFD_BUCKET);
+    const token:string = String(process.env.EFD_TOKEN);
+    const influxDB = new InfluxDB({ url, token });
+    const queryApi = influxDB.getQueryApi("");
+
+    new Promise((resolve, reject) => {
+        let type = "dome";
+        let test:any = type;
+        const query = types[test as keyof Object];
+        const data:any = [];
+        queryApi.queryRows(query(bucket), {
+            next(row, tableMeta) {
+                data.push(tableMeta.toObject(row));
+            },
+            error(error) {
+                resolve({ [type]: error })
+            },
+            complete() {
+                resolve({ [type]: data })
+            },
+        });
+        }).then((values:any)  => {
+            const isDomeOpen = values.dome.every((value: { _value: number; }) => {
+                return value._value > 90.0
+            }) 
+
+            const payload = {
+                dome: isDomeOpen ? 'open' : 'closed'
+            }
+
+            return res.status(200).json(payload); // TODO: remove when redis-client/dome-stats is implemented
+            axios.post(
+                "https://us-west1-skyviewer.cloudfunctions.net/redis-client/dome-stats", 
+                payload
+            ).then(response => {
+                
+                if(response.data.status == "SUCCESS") {
+                    return res.status(200).json(payload);
+                } else {
+                    return res.status(500).json(response);
+                }
+            }).catch(err => {
+                console.error(err.response);
+                return res.status(500).json(err.data);
+            });
+        
+    }).catch(error => {
+        return res.status(500).json(error);
+    });
+}
+
+
 
 async function dailySummitStats(req: ff.Request, res: ff.Response) {
     const url:string = String(process.env.EFD_URL);
@@ -70,6 +126,8 @@ ff.http("summit-stats", async (req: ff.Request, res: ff.Response) => {
         return dailySummitStats(req, res);
     // } else if(req.path == "/azimuth-stats") {
     //     return azimuthSummitStats(req, res);
+    } else if(req.path == "/dome-stats") {
+        return domeStats(req, res)
     } else {
         return res.status(400).send("Oopsies.");
     }

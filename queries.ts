@@ -1,5 +1,17 @@
 import { flux } from "@influxdata/influxdb-client";
 
+export const domeStatus = (bucket:any) => flux`from(bucket: "${bucket}")
+    |> range(start: -60s)
+    |> filter(fn: (r) => 
+        r._measurement == "lsst.sal.MTDome.apertureShutter" and 
+        (
+            r._field == "positionActual0" or r._field == "positionActual1"
+        )
+    )
+    |> filter(fn: (r) => r._value > 99.0)
+    |> last()
+    |> yield(name: "domeOpen")`;
+
 export const azimuthStatus = (bucket:any) => flux`from(bucket: "${bucket}")
     |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
     |> filter(fn: (r) => r._measurement == "lsst.sal.ATPtg.mountStatus")
