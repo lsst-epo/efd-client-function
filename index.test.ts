@@ -118,7 +118,7 @@ describe('Summit Stats', () => {
   });
 
   test.each([
-    // ['/current-stats', 'current'], # we had to return 500 due to reject() instead of resolve()
+    // ['/current-stats', 'current'], # this doesn't work, even if we return 500 by switching to reject() instead of resolve()
     ['/hourly-stats', 'hourly'],
     ['/daily-stats', 'daily']
   ])('should handle InfluxDB errors on %s', async (path, key) => {

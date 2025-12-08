@@ -247,8 +247,7 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
                 data.push(tableMeta.toObject(row));
             },
             error(error) {
-                // resolve({ [type]: error })
-                reject(error);
+                resolve({ [type]: error })
             },
             complete() {
                 resolve({ [type]: data })
