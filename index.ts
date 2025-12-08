@@ -43,7 +43,6 @@ async function domeStats(req: ff.Request, res: ff.Response) {
                 dome: isDomeOpen ? 'open' : 'closed'
             }
 
-            return res.status(200).json(payload); // TODO: remove when redis-client/dome-stats is implemented
             axios.post(
                 "https://us-west1-skyviewer.cloudfunctions.net/redis-client/dome-stats", 
                 payload
@@ -248,7 +247,8 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
                 data.push(tableMeta.toObject(row));
             },
             error(error) {
-                resolve({ [type]: error })
+                // resolve({ [type]: error })
+                reject(error);
             },
             complete() {
                 resolve({ [type]: data })
