@@ -83,7 +83,7 @@ async function dailySummitStats(req: ff.Request, res: ff.Response) {
                 data.push(tableMeta.toObject(row));
             },
             error(error) {
-                resolve({ [type]: error })
+                reject({error})
             },
             complete() {
                 resolve({ [type]: data })
@@ -200,7 +200,7 @@ async function hourlySummitStats(req: ff.Request, res: ff.Response) {
                 data.push(tableMeta.toObject(row));
             },
             error(error) {
-                resolve({ [type]: error })
+                reject({error})
             },
             complete() {
                 resolve({ [type]: data })
@@ -247,7 +247,7 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
                 data.push(tableMeta.toObject(row));
             },
             error(error) {
-                resolve({ [type]: error })
+                reject({error})
             },
             complete() {
                 resolve({ [type]: data })
@@ -257,7 +257,6 @@ async function currentSummitStats(req: ff.Request, res: ff.Response) {
             const payload = {
                 current: values.current[0]
             }
-        
         axios.post(
             "https://us-west1-skyviewer.cloudfunctions.net/redis-client/current-stats", 
             payload

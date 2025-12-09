@@ -65,7 +65,7 @@ describe('Summit Stats', () => {
     
     jest.spyOn(console, 'error').mockImplementation(() => {}); // Silence console.error during tests
 
-    // Setup Influx Infrastructure
+    // Setup Influx mock
     queryRowsMock = jest.fn();
     mockedInflux.mockImplementation(() => ({
       getQueryApi: jest.fn().mockReturnValue({ queryRows: queryRowsMock }),
@@ -118,19 +118,19 @@ describe('Summit Stats', () => {
   });
 
   test.each([
-    // ['/current-stats', 'current'], # this doesn't work, even if we return 500 by switching to reject() instead of resolve()
+    ['/current-stats', 'current'], 
     ['/hourly-stats', 'hourly'],
     ['/daily-stats', 'daily']
   ])('should handle InfluxDB errors on %s', async (path, key) => {
     const { req, res } = createMockContext(path);
-    const dbError = new Error("Some error");
+    const error = new Error("Some error");
 
-    mockInfluxStream({ error: dbError }); // Simulate error
+    mockInfluxStream({ error: error }); // Simulate error
 
     await mainHandler(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ [key]: dbError });
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error });
   });
 
   it('should handle Axios downstream errors', async () => {
